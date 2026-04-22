@@ -1,0 +1,21 @@
+[package]
+name = "booker"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde_json= "*"
+rbook = { version = "0.6.6", optional = true }
+xhtml_parser = { version = "0.2.10", optional = true }
+nebula_host = { path = "../nebula_host" }
+eink = { path = "../nebula_proj/libs/eink" }
+spaceport = { path = "../spaceport", optional = true}
+
+# reade = { path = "../orbit/orbit-apps/reade" }
+
+[features]
+default = ["terminal", "epub"]
+terminal = []
+epub = [ "rbook", "xhtml_parser" ]
+"1.54" = ["spaceport"]
+"4.2" = []

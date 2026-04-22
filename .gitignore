@@ -1,0 +1,5 @@
+/target
+res/
+res/*.epub
+res/*.txt
+res/*.rtf
