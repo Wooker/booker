@@ -86,6 +86,7 @@ fn main() {
         exit(1);
     }
 
+    #[cfg(not(feature = "terminal"))]
     let port = if let Some(value) = args
         .iter()
         .find(|a| a.contains("--port="))
@@ -139,7 +140,6 @@ fn main() {
         }
         #[cfg(not(feature = "terminal"))]
         {
-            use nebula_host::Command;
             // lines.push(String::from("show"));
             // Serialize and send commands
             if !lines.is_empty() {
@@ -156,48 +156,43 @@ fn main() {
                     partial: true,
                 };
                 println!("Config");
-                let payload =
-                    nebula_host::postcard::to_slice(&eink::Command::Config(conf), &mut arr)
-                        .unwrap();
-                let args = nebula_host::comm::handlers::invoke::InvokeArgs::new(
+                let payload = postcard::to_slice(&eink::Command::Config(conf), &mut arr).unwrap();
+                let args = comm::handlers::invoke::InvokeArgs::new(
                     port.to_string(),
                     "reade".to_string(),
                     payload.to_vec(),
                     "30".to_string(),
                 );
-                match nebula_host::comm::handlers::invoke::handle(args) {
+                match comm::handlers::invoke::handle(args) {
                     Ok(()) => {}
                     Err(()) => continue 'main,
                 }
 
                 println!("Text");
-                let payload = nebula_host::postcard::to_slice(
-                    &eink::Command::Text(lines.join("").as_bytes()),
-                    &mut arr,
-                )
-                .unwrap();
+                let payload =
+                    postcard::to_slice(&eink::Command::Text(lines.join("").as_bytes()), &mut arr)
+                        .unwrap();
 
-                let args = nebula_host::comm::handlers::invoke::InvokeArgs::new(
+                let args = comm::handlers::invoke::InvokeArgs::new(
                     port.to_string(),
                     "reade".to_string(),
                     payload.to_vec(),
                     "50".to_string(),
                 );
-                match nebula_host::comm::handlers::invoke::handle(args) {
+                match comm::handlers::invoke::handle(args) {
                     Ok(()) => {}
                     Err(()) => continue 'main,
                 }
 
                 println!("Show");
-                let payload =
-                    nebula_host::postcard::to_slice(&eink::Command::Show, &mut arr).unwrap();
-                let args = nebula_host::comm::handlers::invoke::InvokeArgs::new(
+                let payload = postcard::to_slice(&eink::Command::Show, &mut arr).unwrap();
+                let args = comm::handlers::invoke::InvokeArgs::new(
                     port.to_string(),
                     "reade".to_string(),
                     payload.to_vec(),
-                    "20".to_string(),
+                    "1000".to_string(),
                 );
-                match nebula_host::comm::handlers::invoke::handle(args) {
+                match comm::handlers::invoke::handle(args) {
                     Ok(()) => {}
                     Err(()) => continue 'main,
                 }
@@ -211,11 +206,11 @@ fn main() {
             #[cfg(not(feature = "terminal"))]
             {
                 println!("{}/{}", index, pages.len());
-                use spaceport::packet::{MAX_PAYLOAD_LENGTH, Packet};
+                use comm::spaceport::packet::{MAX_PAYLOAD_LENGTH, Packet};
                 let mut payload = [0; MAX_PAYLOAD_LENGTH];
-                let args = nebula_host::comm::handlers::listen::ListenArgs::new(port.to_string());
+                let args = comm::handlers::listen::ListenArgs::new(port.to_string());
 
-                if let Some(message) = nebula_host::comm::handlers::listen::read(&args) {
+                if let Some(message) = comm::handlers::listen::read(&args) {
                     match Packet::decode(&message, &mut payload) {
                         Ok(packet) => {
                             print!("{:?}", packet,);
